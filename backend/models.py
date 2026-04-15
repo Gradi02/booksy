@@ -1,7 +1,16 @@
-from sqlalchemy import Date, Integer, String, Text
+from enum import Enum as PyEnum
+
+from sqlalchemy import Date, Enum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database import Base
+
+
+class DeviceStatus(str, PyEnum):
+    """Device status enum - must match database values."""
+    AVAILABLE = "Available"
+    IN_USE = "In Use"
+    REPAIR = "Repair"
 
 
 class User(Base):
@@ -20,7 +29,9 @@ class Device(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     brand: Mapped[str | None] = mapped_column(String(100), nullable=True)
     purchase_date: Mapped[Date | None] = mapped_column(Date, nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="Unknown")
+    status: Mapped[DeviceStatus] = mapped_column(
+        Enum(DeviceStatus), nullable=False, default=DeviceStatus.AVAILABLE
+    )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     assigned_to: Mapped[str | None] = mapped_column(String(255), nullable=True)
     history: Mapped[str | None] = mapped_column(Text, nullable=True)

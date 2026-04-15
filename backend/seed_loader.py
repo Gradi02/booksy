@@ -17,6 +17,16 @@ def _parse_date(value: str | None) -> date | None:
         return None
 
 
+def _parse_status(value: str | None) -> models.DeviceStatus:
+    """Parse status string to DeviceStatus enum."""
+    if not value:
+        return models.DeviceStatus.AVAILABLE
+    try:
+        return models.DeviceStatus(value)
+    except ValueError:
+        return models.DeviceStatus.AVAILABLE
+
+
 def ensure_default_admin(db: Session) -> None:
     existing = db.query(models.User).filter(models.User.username == "admin").first()
     if existing:
@@ -48,7 +58,7 @@ def seed_devices(db: Session, seed_path: Path) -> None:
             name=item.get("name") or "Unnamed Device",
             brand=item.get("brand") or None,
             purchase_date=_parse_date(item.get("purchaseDate")),
-            status=item.get("status") or "Unknown",
+            status=_parse_status(item.get("status")),
             notes=item.get("notes"),
             assigned_to=item.get("assignedTo"),
             history=item.get("history"),

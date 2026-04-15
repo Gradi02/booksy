@@ -47,3 +47,17 @@ VSC with github copilot
 ### Audit:
 - Login endpoint now accessible from frontend without CORS errors
 - Backend properly configured to handle both localhost and 127.0.0.1 origins
+
+
+
+## Prompt 4:
+### Tool:
+VSC with github copilot
+
+### AI Generated Code Notes:
+- Using `pushd` to properly set working directory for uvicorn
+- Database auto-recreates on startup with enum schema
+- All endpoints require JWT authentication
+- CORS properly configured for both development IPs
+
+### Audit:

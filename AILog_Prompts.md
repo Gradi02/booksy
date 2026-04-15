@@ -49,7 +49,17 @@ General:
 
 
 
-## Prompt 3: Fixing login issue
+## Prompt 3: Fix Frontend CORS Error
 
 when loging, it throws "POST http://127.0.0.1:8000/token net::ERR_FAILED 200 (OK)
-login @ App.vue:20" but post methog of loging in backend seems good "http 200".
+login	@	App.vue:20" but post methog of loging in backend seems good "http 200".
+
+
+
+## Prompt 4: Full CRUD, Backend Restructuring, Smart Dashboard, and Status Enum
+
+Requirements:
+- Add full CRUD for hardware management: Add new items, delete old ones, and toggle the "Repair" status
+- Make file structure in backend cleaner and separate login and devices logic (preparing for users managing and Docker)
+- Smart Dashboard: A list of hardware showing Name, Brand, Purchase Date, and Status (Available, In Use, Repair -> via enum). Must support sorting and filtering.
+- Update AILog.md and AILog prompts history
