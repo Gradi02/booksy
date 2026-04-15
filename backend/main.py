@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
-from routers import auth_router, devices_router
+from routers import auth_router, devices_router, users_router
 from seed_loader import initialize_data
 
 app = FastAPI(title="Booksy Inventory API")
@@ -27,6 +27,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router)
 app.include_router(devices_router)
+app.include_router(users_router)
 
 
 @app.on_event("startup")

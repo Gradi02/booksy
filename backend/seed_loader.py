@@ -28,12 +28,26 @@ def _parse_status(value: str | None) -> models.DeviceStatus:
 
 
 def ensure_default_admin(db: Session) -> None:
-    existing = db.query(models.User).filter(models.User.username == "admin").first()
+    # Check if admin user exists with new username
+    existing = db.query(models.User).filter(models.User.username == "admin@booksy.com").first()
     if existing:
+        # Ensure it has admin privileges
+        if not existing.is_admin:
+            existing.is_admin = True
+            db.commit()
         return
+    
+    # Delete old admin user if it exists (migration)
+    old_admin = db.query(models.User).filter(models.User.username == "admin").first()
+    if old_admin:
+        db.delete(old_admin)
+        db.commit()
+    
+    # Create new admin user with new credentials
+    # Note: Default admin password bypasses length validation since it's created during seeding
     admin = models.User(
-        username="admin",
-        hashed_password=get_password_hash("admin123"),
+        username="admin@booksy.com",
+        hashed_password=get_password_hash("admin"),
         is_admin=True,
     )
     db.add(admin)

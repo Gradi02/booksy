@@ -50,6 +50,29 @@ VSC with github copilot
 
 
 
+## Prompt 4-5: Bug Fixes & Security Hardening
+### Tool:
+VSC with github copilot
+
+### AI Generated Code Notes:
+- Fixed 3 critical bugs in user deletion and device creation
+- Implemented security features:
+  - JWT SECRET_KEY now read from .env (configurable for production)
+  - Added admin-only authorization to device endpoints (POST, PUT, PATCH, DELETE)
+  - Password validation: minimum 8 characters
+  - Email validation: users must use format `username@booksy.com` (except admin)
+  - Connection pooling for PostgreSQL (pool_size=5, max_overflow=10, pool_pre_ping=True)
+- Updated documentation with deployment guide and tech debt notes
+- Frontend UI updated to show email format requirements and password constraints
+
+### Audit:
+- All validators tested and working correctly
+- Admin endpoints properly protected
+- Deployment documentation simplified and actionable
+- Ready for production deployment on Render + Vercel
+
+
+
 ## Prompt 4:
 ### Tool:
 VSC with github copilot
@@ -110,3 +133,50 @@ VSC with github copilot - firstly asked about "how to implement this solution", 
   - `DEPLOYMENT.md` - Complete deployment guide with step-by-step instructions
 
 ### Audit:
+- Filer were prepared for deploy for selected platform and project is still running properly on localhost. Time to add missing features.
+
+
+
+## Prompt 7:
+### Tool:
+VSC with github copilot
+
+### AI Generated Code Notes:
+- **Backend Users CRUD Implementation**: Created complete user management endpoints at `/users`:
+  - `GET /users` - List all users (admin only)
+  - `GET /users/{id}` - Get specific user (admin only)
+  - `POST /users` - Create new user (admin only, validates unique username)
+  - `PUT /users/{id}` - Update user including password and admin role (admin only)
+  - `DELETE /users/{id}` - Delete user with self-deletion protection (admin only)
+  - All endpoints require admin authentication, return proper HTTP status codes, and handle errors gracefully
+  
+- **Updated Backend Structure**:
+  - Created `routers/users.py` following consistent pattern with devices router
+  - Added `UserCreate` and `UserUpdate` Pydantic schemas in `schemas.py`
+  - Updated `routers/__init__.py` to export users_router
+  - Integrated users_router into `main.py`
+  - Password hashing automatically applied for new/updated users
+  
+- **Frontend Session Persistence**:
+  - Added `onMounted` hook to restore token and user data from localStorage on page refresh
+  - Implemented `saveSession()` and `clearSession()` functions to manage token persistence
+  - Login now calls `saveSession()` to store token and currentUser data
+  - Logout calls `clearSession()` to remove stored data
+  - **Fixes page refresh issue** - user no longer redirected to login after refresh
+  
+- **Frontend User Management Implementation**:
+  - Added `addUser()`, `updateUser()`, `deleteUser()` async functions in App.vue
+  - User modal form with username (disabled on edit), password, and admin role checkbox
+  - Connected all user CRUD operations to new backend endpoints
+  - Admin Users View (`AdminUsersView.vue`) shows roles alongside user management options
+  - All operations update UI immediately via `fetchUsers()` after API calls
+  
+- **Frontend UI Cleanup**:
+  - Removed star emoticon (✨) from search bar in Header.vue
+  - Removed refresh button (🔄) from Header.vue
+  - Removed "X items" device count display from Header.vue
+  - Simplified Header component to only show search input with left icon (🔍)
+  - Updated App.vue Header call to only pass search prop (removed device-count and @refresh)
+
+### Audit:
+- All missing features were implemented and look fine and safe for now.

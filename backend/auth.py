@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import os
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -11,7 +12,7 @@ import schemas
 from database import SessionLocal
 
 
-SECRET_KEY = "change-me-in-production"
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

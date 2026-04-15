@@ -1,10 +1,9 @@
 <script setup>
 defineProps({
   search: String,
-  deviceCount: Number,
 });
 
-defineEmits(["update:search", "refresh"]);
+defineEmits(["update:search"]);
 </script>
 
 <template>
@@ -21,18 +20,7 @@ defineEmits(["update:search", "refresh"]);
             placeholder="Ask AI…"
             class="w-full md:w-96 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">✨</span>
         </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-600 font-medium">{{ deviceCount }} items</span>
-        <button
-          @click="$emit('refresh')"
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          title="Refresh"
-        >
-          🔄
-        </button>
       </div>
     </div>
   </header>

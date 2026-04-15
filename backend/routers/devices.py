@@ -31,9 +31,11 @@ def get_device(
 def create_device(
     payload: schemas.DeviceCreate,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
 ):
-    """Create a new device."""
+    """Create a new device (admin only)."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     device = models.Device(**payload.model_dump())
     db.add(device)
     db.commit()
@@ -46,9 +48,11 @@ def update_device(
     device_id: int,
     payload: schemas.DeviceUpdate,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
 ):
-    """Update a device."""
+    """Update a device (admin only)."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     device = db.query(models.Device).filter(models.Device.id == device_id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
@@ -65,9 +69,11 @@ def toggle_device_status(
     device_id: int,
     status_value: models.DeviceStatus,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
 ):
-    """Update a device's status."""
+    """Update a device's status (admin only)."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     device = db.query(models.Device).filter(models.Device.id == device_id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
@@ -79,9 +85,11 @@ def toggle_device_status(
 
 @router.delete("/{device_id}", status_code=204)
 def delete_device(
-    device_id: int, db: Session = Depends(get_db), _: models.User = Depends(get_current_user)
+    device_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)
 ):
-    """Delete a device."""
+    """Delete a device (admin only)."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
     device = db.query(models.Device).filter(models.Device.id == device_id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")

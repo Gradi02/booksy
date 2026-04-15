@@ -1,102 +1,157 @@
-# Deployment Guide for Booksy
+# Deployment Guide: Booksy Hardware Manager
 
-## Overview
-This guide covers deploying the Booksy fullstack application:
-- **Backend**: FastAPI → Render (with auto-healing PostgreSQL)
-- **Frontend**: Vue 3 + Vite → Vercel
+Quick step-by-step instructions to deploy to Render (backend) and Vercel (frontend).
 
-## What's Been Prepared
+## Pre-Deployment Checklist
 
-### Backend Changes
-1. **requirements.txt** - Added `psycopg2-binary` (PostgreSQL driver) and `python-dotenv`
-2. **database.py** - Now loads environment variables and supports PostgreSQL with connection pooling
-3. **main.py** - CORS origins are now configurable via `ALLOWED_ORIGINS` environment variable
-4. **.env.example** - Template showing required configuration variables
-5. **render.yaml** - Render deployment manifest with PostgreSQL database setup
-
-### Frontend Changes
-1. **App.vue** - Updated to use `import.meta.env.VITE_API_URL` for API endpoint
-2. **.env.example** - Template showing required environment variables
-3. **vercel.json** - SPA routing configuration for Vercel
-
-### Auto-Healing System
-The auto-healing is built into your existing startup logic:
-```python
-@app.on_event("startup")
-def startup():
-    Base.metadata.create_all(bind=engine)  # Creates all tables if missing
-    initialize_data(db)                     # Seeds data if empty
-```
-
-When Render wakes up the container:
-1. ✅ Database connection is restored
-2. ✅ Tables are recreated if needed
-3. ✅ Data is seeded from `seed.json` if database is empty
-4. ✅ Admin user (`admin/admin123`) is ensured
+- [ ] Backend code changes committed to GitHub
+- [ ] Frontend code changes committed to GitHub
+- [ ] Generated strong SECRET_KEY for production
+- [ ] Updated `.env` with new SECRET_KEY
 
 ---
 
-## Deployment Steps
+## Step 1: Generate Production SECRET_KEY
 
-### Step 1: Render Backend Deployment
-
-#### Option A: Using render.yaml (Automatic)
-```bash
-# 1. Push your code to GitHub
-git add .
-git commit -m "Prepare for deployment"
-git push
-
-# 2. Go to https://render.com and sign up
-# 3. Create new "Blueprint" (Infrastructure as Code)
-# 4. Connect your GitHub repository
-# 5. Select the render.yaml file
-# 6. Deploy!
-```
-
-#### Option B: Manual Dashboard Setup
-```bash
-# 1. Create PostgreSQL database:
-#    - Service: PostgreSQL Database
-#    - Name: booksy-postgres
-#    - Plan: Free tier
-#    - Region: Oregon (or closest)
-#    - Note: Copy the Internal Database URL (not External)
-
-# 2. Create Web Service:
-#    - Name: booksy-backend
-#    - Runtime: Python
-#    - Build Command: pip install -r requirements.txt
-#    - Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
-#    - Environment Variables:
-#      • DATABASE_URL: (from PostgreSQL service connection string)
-#      • ALLOWED_ORIGINS: https://your-frontend.vercel.app,https://your-backend.onrender.com
-
-# 3. Deploy!
-```
-
-### Step 2: Vercel Frontend Deployment
+Run this command locally to generate a strong key:
 
 ```bash
-# 1. Ensure .env.production exists in frontend/ directory
-#    Add: VITE_API_URL=https://your-backend.onrender.com
-
-# 2. Go to https://vercel.com and sign up
-
-# 3. Import your GitHub repository
-
-# 4. Framework Preset: Other (or Vite)
-#    Build & Development Settings:
-#    - Framework: Vite
-#    - Build Command: npm run build
-#    - Output Directory: dist
-#    - Root Directory: frontend (if monorepo)
-
-# 5. Environment Variables: Add from .env.example
-#    VITE_API_URL=https://your-backend.onrender.com
-
-# 6. Deploy!
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
+
+Save this key - you'll need it when deploying to Render.
+
+**Example output:** `cb82a8e986dd7def4b37a759c98e12fa33e2fc1e54b5ae0f44f4410470c0cb80`
+
+---
+
+## Step 2: Deploy Backend to Render
+
+### Option A: Automatic Blueprint Deployment (Recommended)
+
+1. Push your code to GitHub
+2. Go to [render.com](https://render.com) and sign in
+3. Click **"New +"** → **"Blueprint"**
+4. Connect your GitHub repository
+5. Render will auto-detect `render.yaml`
+6. Confirm and deploy
+
+### Option B: Manual Dashboard Setup
+
+1. **Create PostgreSQL Database:**
+   - Click **"New +"** → **"PostgreSQL Database"**
+   - Name: `booksy-postgres`
+   - Plan: Free tier
+   - Region: Oregon (or closest to you)
+   - Save the **Internal Database URL** (not External)
+
+2. **Create Web Service:**
+   - Click **"New +"** → **"Web Service"**
+   - Connect your GitHub repository
+   - Name: `booksy-backend`
+   - Runtime: Python
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   
+3. **Set Environment Variables:**
+   - `DATABASE_URL`: (paste the Internal Database URL from PostgreSQL)
+   - `SECRET_KEY`: (use the generated key from Step 1)
+   - `ALLOWED_ORIGINS`: `https://your-frontend.vercel.app,https://booksy-backend.onrender.com`
+
+4. Click **"Create Web Service"** and wait for deployment (~2 min)
+
+5. **Copy your backend URL** - you'll need it in Step 4
+
+---
+
+## Step 3: Deploy Frontend to Vercel
+
+1. Go to [vercel.com](https://vercel.com) and sign in (use GitHub)
+2. Click **"Add New..."** → **"Project"**
+3. Select your GitHub repository
+4. Configure:
+   - **Framework Preset**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+   - **Root Directory**: `frontend`
+
+5. **Set Environment Variable:**
+   - `VITE_API_URL`: `https://your-backend.onrender.com` (replace with your actual Render backend URL from Step 2)
+
+6. Click **"Deploy"** and wait (~1 min)
+
+7. Copy your frontend URL after deployment
+
+---
+
+## Step 4: Update Backend CORS Origins (if needed)
+
+If deployed successfully, go back to Render backend service:
+
+1. Go to your backend service on Render
+2. Click **"Environment"**
+3. Update `ALLOWED_ORIGINS` to include your Vercel frontend URL:
+   ```
+   https://your-frontend.vercel.app,https://booksy-backend.onrender.com
+   ```
+4. Click **"Save" → "Manual Deploy"** to restart
+
+---
+
+## Step 5: Test the Deployment
+
+1. Open your Vercel frontend URL in browser
+2. Log in with:
+   - **Username:** `admin`
+   - **Password:** `admin123`
+3. Try viewing devices, creating a new user, etc.
+4. **IMPORTANT:** Change the admin password immediately after first login
+
+---
+
+## Troubleshooting
+
+### Backend shows "Service is spinning up"
+- Render's free tier takes ~30 sec to wake up
+- Wait a moment and refresh the page
+- Auto-healing will reload database and seed data on startup
+
+### Login doesn't work
+- Check `ALLOWED_ORIGINS` on Render includes your Vercel frontend URL
+- Check frontend `.env.production` has correct `VITE_API_URL`
+- Check browser console for CORS errors
+- Verify `SECRET_KEY` is set in Render environment
+
+### Database connection error
+- Ensure `DATABASE_URL` uses **Internal** connection string (not External)
+- PostgreSQL takes ~1 min to initialize on first Render deployment
+
+### "Admin access required" when creating/editing devices
+- Only admins can create/edit devices
+- Use admin account or grant admin role to your user
+
+---
+
+## Auto-Healing System
+
+If Render backend wakes from cold start:
+1. Database connection restored
+2. All tables recreated if missing
+3. Data reseeded from `seed.json`
+4. Admin user (`admin/admin123`) ensured to exist
+
+No manual intervention needed - the app auto-recovers.
+
+---
+
+## Production Notes
+
+- Default admin user: `admin` / `admin123` → **Change password immediately**
+- All passwords must be at least 8 characters
+- Regular users must use email format: `username@booksy.com`
+- Devices can only be created/edited/deleted by admins
+- Token expiration: 30 minutes
+- Sessions persist in browser localStorage
 
 ### Step 3: Connect Frontend to Backend
 

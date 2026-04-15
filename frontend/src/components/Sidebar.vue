@@ -1,13 +1,14 @@
 <script setup>
 defineProps({
   active: String,
+  isAdmin: Boolean,
 });
 
-defineEmits(["logout"]);
+defineEmits(["navigate", "logout"]);
 </script>
 
 <template>
-  <aside class="w-64 bg-white border-r border-gray-200 shadow-sm overflow-y-auto">
+  <aside class="w-64 bg-white border-r border-gray-200 shadow-sm overflow-y-auto flex flex-col h-screen">
     <!-- Logo Section -->
     <div class="p-6 border-b border-gray-200">
       <div class="flex items-center gap-3">
@@ -19,47 +20,68 @@ defineEmits(["logout"]);
     </div>
 
     <!-- Navigation -->
-    <nav class="p-4 space-y-2">
-      <a
-        href="#"
-        :class="[
-          'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
-          active === 'hardware'
-            ? 'bg-blue-50 text-blue-600'
-            : 'text-gray-700 hover:bg-gray-100',
-        ]"
-      >
-        <span class="text-xl">📋</span>
-        Hardware List
-      </a>
-      <a
-        href="#"
-        :class="[
-          'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
-          active === 'rentals'
-            ? 'bg-blue-50 text-blue-600'
-            : 'text-gray-700 hover:bg-gray-100',
-        ]"
-      >
-        <span class="text-xl">🛒</span>
-        My Rentals
-      </a>
-      <a
-        href="#"
-        :class="[
-          'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
-          active === 'admin'
-            ? 'bg-blue-50 text-blue-600'
-            : 'text-gray-700 hover:bg-gray-100',
-        ]"
-      >
-        <span class="text-xl">⚙️</span>
-        Admin Panel
-      </a>
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <!-- User Section -->
+      <div class="mb-6">
+        <p class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</p>
+        <button
+          @click="$emit('navigate', 'hardware')"
+          :class="[
+            'w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
+            active === 'hardware'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-700 hover:bg-gray-100',
+          ]"
+        >
+          <span class="text-xl">📋</span>
+          Hardware List
+        </button>
+        <button
+          @click="$emit('navigate', 'rentals')"
+          :class="[
+            'w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
+            active === 'rentals'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-700 hover:bg-gray-100',
+          ]"
+        >
+          <span class="text-xl">🛒</span>
+          My Rentals
+        </button>
+      </div>
+
+      <!-- Admin Section (Only for Admins) -->
+      <div v-if="isAdmin" class="border-t border-gray-200 pt-4">
+        <p class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</p>
+        <button
+          @click="$emit('navigate', 'admin-devices')"
+          :class="[
+            'w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
+            active === 'admin-devices'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-700 hover:bg-gray-100',
+          ]"
+        >
+          <span class="text-xl">⚙️</span>
+          Device Management
+        </button>
+        <button
+          @click="$emit('navigate', 'admin-users')"
+          :class="[
+            'w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors',
+            active === 'admin-users'
+              ? 'bg-blue-50 text-blue-600'
+              : 'text-gray-700 hover:bg-gray-100',
+          ]"
+        >
+          <span class="text-xl">👥</span>
+          User Management
+        </button>
+      </div>
     </nav>
 
     <!-- Bottom Section -->
-    <div class="absolute bottom-0 left-0 right-0 w-64 p-4 border-t border-gray-200">
+    <div class="p-4 border-t border-gray-200">
       <button
         @click="$emit('logout')"
         class="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors"

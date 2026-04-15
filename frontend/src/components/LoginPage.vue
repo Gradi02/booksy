@@ -32,15 +32,17 @@ defineEmits(["update:username", "update:password", "login"]);
         <form @submit.prevent="$emit('login')" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Username
+              Username (Email)
             </label>
             <input
               :value="username"
               @input="$emit('update:username', $event.target.value)"
               type="text"
+              placeholder="admin or user@booksy.com"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
+            <p class="text-xs text-gray-500 mt-1">Regular users must use email format (@booksy.com)</p>
           </div>
 
           <div>
@@ -68,7 +70,7 @@ defineEmits(["update:username", "update:password", "login"]);
         <div class="mt-6 pt-6 border-t border-gray-200">
           <p class="text-sm text-gray-600 text-center">
             Demo credentials<br />
-            <span class="font-medium">admin / admin123</span>
+            <span class="font-medium">admin@booksy.com / admin</span>
           </p>
         </div>
       </div>

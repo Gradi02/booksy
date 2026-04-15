@@ -172,3 +172,130 @@ Deliverables:
 I would like to deplot this project in vercel (frontend) and render (backend). Because of render not stable container I will need an auto healing system - if backend is waking up, setup default seeded database based on seed.json. The rest of tech stack dont need any changes I think. Tell me more about current situation and what I will need to do to aim this purpose?
 ### and 
 prepare the project for deploy based on previous answer.
+
+
+
+## Prompt 7:
+
+Extend the existing “Hardware Manager” frontend by adding functional behavior to the UI elements described below.
+
+General Notes:
+
+* Focus on frontend logic and state handling (can be mock data or API-ready structure).
+* Keep the current layout and styling.
+* Do NOT implement search functionality yet (search bar remains non-functional/placeholder).
+* Add simple filtering and sorting options in each view (e.g., dropdowns or buttons, not a search input).
+
+---
+
+Views & Functionalities:
+
+1. Hardware List
+
+* Displays all devices (same as current view).
+* Available actions:
+
+  * "Rent" button ONLY (no delete/edit here).
+* Behavior:
+
+  * If device status is "Available" → Rent button is enabled.
+  * Otherwise → button is disabled.
+* No option to remove or edit items in this view.
+
+---
+
+2. My Rentals
+
+* Displays ONLY devices currently rented by the logged-in user.
+* Each row should include:
+
+  * Device info (same structure as Hardware List).
+  * Action: "Return" button.
+* Behavior:
+
+  * Clicking "Return" changes device status to "Available".
+  * Removes the item from “My Rentals” list.
+
+---
+
+3. Admin Panel (Devices Management)
+
+* Displays all devices in a table (similar to Hardware List).
+* Available actions per row:
+
+  * "Edit"
+  * "Mark as In Repair"
+  * "Delete"
+* Additional UI:
+
+  * "Add Item" button at the top of the view (ONLY visible in this panel).
+* Behavior:
+
+  * "Mark as In Repair" → sets status to "In Repair".
+  * "Delete" → removes item from the list.
+  * "Edit" → allows modifying device data (can be modal or inline form).
+  * "Add Item" → allows adding a new device (form/modal).
+
+---
+
+Device State Transitions:
+
+* Default state: "Available"
+* When user clicks "Rent" → "In Use"
+* When user clicks "Return" → "Available"
+* When admin clicks "Mark as In Repair" → "In Repair"
+
+Ensure state updates are reflected across all views consistently.
+
+---
+
+Filtering & Sorting (All Views):
+
+* Provide simple UI controls (e.g., dropdowns, buttons):
+
+  * Filter by status (Available, In Use, In Repair)
+  * Sort by:
+
+    * Date Added
+    * Device Name
+    * Brand
+* Do NOT implement text search.
+* Existing search bar should remain visible but non-functional.
+
+---
+
+Additional Feature: Admin Panel (User Management)
+
+Create a second admin panel for managing users.
+
+Functionality:
+
+* Display list of users.
+* Actions per user:
+
+  * Create new user
+  * Edit user
+  * Delete user
+  * Assign/remove admin role
+
+Behavior:
+
+* Newly created users can immediately log in.
+* Users have access to:
+
+  * Hardware List
+  * My Rentals
+* ONLY admin users can access:
+
+  * Device Admin Panel
+  * User Management Panel
+
+---
+
+Permissions & Roles:
+
+* Default system should include one admin account.
+* Admins can grant admin role to other users.
+* Non-admin users:
+
+  * Cannot see or access any admin panels.

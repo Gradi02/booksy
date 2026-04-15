@@ -1,6 +1,5 @@
 from datetime import date
-
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from models import DeviceStatus
 
@@ -21,6 +20,65 @@ class UserInDB(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    is_admin: bool
+
+    class Config:
+        from_attributes = True
+
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    is_admin: bool = False
+    
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v):
+        # Default admin user is allowed without @booksy.com
+        if v == 'admin':
+            return v
+        if not v.endswith('@booksy.com'):
+            raise ValueError('Username must end with @booksy.com (except admin)')
+        return v
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        return v
+
+
+class UserUpdate(BaseModel):
+    username: str | None = None
+    password: str | None = None
+    is_admin: bool | None = None
+    
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v):
+        if v is None:
+            return v
+        # Default admin user is allowed without @booksy.com
+        if v == 'admin':
+            return v
+        if not v.endswith('@booksy.com'):
+            raise ValueError('Username must end with @booksy.com (except admin)')
+        return v
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if v is None:
+            return v
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        return v
 
 
 class DeviceBase(BaseModel):
@@ -49,9 +107,6 @@ class DeviceUpdate(BaseModel):
 
 class DeviceOut(DeviceBase):
     id: int
-
-    class Config:
-        from_attributes = True
 
     class Config:
         from_attributes = True
