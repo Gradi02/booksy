@@ -167,3 +167,8 @@ Deliverables:
 * Ready to plug into an existing frontend
 
 
+
+## Prompt 6:
+I would like to deplot this project in vercel (frontend) and render (backend). Because of render not stable container I will need an auto healing system - if backend is waking up, setup default seeded database based on seed.json. The rest of tech stack dont need any changes I think. Tell me more about current situation and what I will need to do to aim this purpose?
+### and 
+prepare the project for deploy based on previous answer.

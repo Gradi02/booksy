@@ -2,20 +2,37 @@
 import { ref, computed } from "vue";
 import Sidebar from "./components/Sidebar.vue";
 import Header from "./components/Header.vue";
-import DeviceTable from "./components/DeviceTable.vue";
 import LoginPage from "./components/LoginPage.vue";
+import HardwareListView from "./views/HardwareListView.vue";
+import MyRentalsView from "./views/MyRentalsView.vue";
+import AdminDevicesView from "./views/AdminDevicesView.vue";
+import AdminUsersView from "./views/AdminUsersView.vue";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
+// Authentication & User State
 const username = ref("admin");
 const password = ref("admin123");
 const token = ref("");
-const devices = ref([]);
+const currentUser = ref(null); // Will store user info after login
 const error = ref("");
 const loading = ref(false);
-const showAddForm = ref(false);
 const searchQuery = ref("");
-const activeNav = ref("hardware");
+const currentView = ref("hardware"); // hardware, rentals, admin-devices, admin-users
+
+// Data state
+const devices = ref([]);
+const users = ref([]);
+
+// Modal states
+const showDeviceModal = ref(false);
+const showUserModal = ref(false);
+const editingDevice = ref(null);
+const editingUser = ref(null);
+
+// Filter & Sort state
+const statusFilter = ref("All");
+const sortBy = ref("date"); // date, name, brand
 
 const newDevice = ref({
   name: "",
@@ -23,17 +40,12 @@ const newDevice = ref({
   purchase_date: "",
   status: "Available",
   notes: "",
-  assigned_to: "",
 });
 
-const filteredDevices = computed(() => {
-  if (!searchQuery.value) return devices.value;
-  const query = searchQuery.value.toLowerCase();
-  return devices.value.filter(
-    (d) =>
-      d.name.toLowerCase().includes(query) ||
-      (d.brand && d.brand.toLowerCase().includes(query))
-  );
+const newUser = ref({
+  username: "",
+  password: "",
+  is_admin: false,
 });
 
 async function login() {

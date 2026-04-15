@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: booksy-backend
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: booksy-postgres
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: "https://your-frontend.vercel.app,https://booksy-backend.onrender.com"
+    
+  - type: pserv
+    name: booksy-postgres
+    engine: postgres
+    version: "15"
+    region: oregon
+    plan: free
+    ipAllowList: []

@@ -85,5 +85,28 @@ VSC with github copilot and ChatGPT online as helper in prompt preparation
 
 
 
+## Prompt 6:
+### Tool:
+VSC with github copilot - firstly asked about "how to implement this solution", then decided to "do it as you described before"
 
+### AI Generated Code Notes:
+- Analyzed deployment requirements for Vercel (frontend) + Render (backend) with auto-healing
+- Identified SQLite persistence issue on Render's ephemeral filesystem
+- Recommended PostgreSQL migration for production stability
+- - **Backend Deps**: Added `psycopg2-binary` (PostgreSQL driver) and `python-dotenv` to requirements.txt
+- **Database Layer**: Updated database.py to:
+  - Load `.env` file via `python-dotenv`
+  - Support both SQLite (local dev) and PostgreSQL (production) via `DATABASE_URL` env var
+  - Added connection pooling for production (skipped for SQLite)
+- **CORS Configuration**: Moved hardcoded CORS origins to environment variable `ALLOWED_ORIGINS` in main.py
+- **Frontend**: Updated App.vue to use `import.meta.env.VITE_API_URL` instead of hardcoded localhost
+- **Configuration Files Created**:
+  - `backend/.env.example` - Template for backend configuration
+  - `backend/.env` - Local development settings (SQLite + local CORS)
+  - `backend/render.yaml` - Render deployment manifest with PostgreSQL setup
+  - `frontend/.env.example` - Template for frontend environment
+  - `frontend/.env.production` - Production API URL template
+  - `frontend/vercel.json` - Vercel SPA routing configuration
+  - `DEPLOYMENT.md` - Complete deployment guide with step-by-step instructions
 
+### Audit:
