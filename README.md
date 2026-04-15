@@ -91,23 +91,9 @@ A fullstack inventory management system for tracking company hardware devices an
 ## Best Next Steps - 24h Roadmap
 
 1. **Change default admin password** immediately in production
-2. **Add rate limiting** to `/token` endpoint (prevent brute force)
-3. **Implement refresh tokens** (better UX for long sessions)
-4. **Add email verification** for new users (confirm @booksy.com domain)
-5. **Device History Tracking** Record status changes with timestamps
-6. **Reporting & Analytics**
-   - Most rented devices
-   - Device availability report
-   - User activity dashboard
-   - Device depreciation tracking
-7. **Integrate Langfuse** for AI usage tracking and analytics
-8. **Enhanced UI/UX**
-   - Device images/thumbnails
-   - Dark mode
-   - Advanced dashboard with charts
-   - Calendar view for rental timeline
-
----
+2. **Add email verification** for new users (confirm @booksy.com domain)
+3. **Device History Tracking** Record status changes with timestamps
+4. **Integrate Langfuse** for AI usage tracking and analytics
 
 ## Local Development
 
@@ -130,63 +116,16 @@ npm run dev
 ```
 - App: http://localhost:5173
 
----
-
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment procedures (Render backend + Vercel frontend).
-
----
-
 ## Default Credentials
 
 - **Username:** `admin@booksy.com`
 - **Password:** `admin`
-
-⚠️ **Change immediately after first login in production**
-
----
-
-## Project Structure
-
-```
-booksy/
-├── backend/
-│   ├── main.py              # FastAPI app & routes
-│   ├── auth.py              # JWT authentication
-│   ├── database.py          # SQLAlchemy setup
-│   ├── models.py            # Database models
-│   ├── schemas.py           # Pydantic schemas
-│   ├── seed_loader.py       # Database seeding
-│   ├── seed.json            # Initial data
-│   ├── requirements.txt     # Python dependencies
-│   ├── render.yaml          # Render deployment config
-│   └── routers/             # API endpoint routers
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.vue          # Main app component
-│   │   ├── main.js          # Vue entry point
-│   │   ├── components/      # Reusable components
-│   │   └── views/           # Page components
-│   ├── package.json         # Node dependencies
-│   ├── vite.config.js       # Vite config
-│   └── vercel.json          # Vercel SPA routing
-│
-├── DEPLOYMENT.md            # Production deployment guide
-├── AILog.md                 # AI conversation notes
-└── README.md                # This file
-```
-
----
 
 ## Tech Stack
 
 - **Backend:** FastAPI, SQLAlchemy, SQLite (dev), PostgreSQL (prod), JWT auth
 - **Frontend:** Vue 3, Vite, Tailwind CSS
 - **Deployment:** Render (backend), Vercel (frontend)
-
----
 
 ## License
 

@@ -1,6 +1,15 @@
 # AILog - Notes & Audit
 
-For complete prompt history, see [AILog_Prompts.md] 
+## Tooling: 
+Cursor, Github Copilot, Gemini/ChatGPT (online LLMs)
+## Data Strategy:
+Firstly I asked online LLM, about sugested tech-stack to analyze it and look for any issues. At the beginning I was sure that deployment will be the hardest part of it because of limitations of free hostings. Finally I decided to mostly follow base tech-stack with minor modifications to fit for selected free hostings requirements. Initial Data are going to be a safe spot, and app is going to import them at every backend startup. It is the effect of selected hosting, but also nice option for this type of live demo - after some testing app will reset to initial data set.
+## Prompt Trial:
+For complete major prompt history, see [AILog_Prompts.md]. Lower there, you can see the short descriptions of these prompts and my personal Audit - short grade of what I got with this prompt.
+## The "Correction":
+The hardest was frontend actually, because of many buttons and panels. There was many bugs that were blocked in backend but not in frontend causing for example red error throwin in frontend when trying to edit device.
+Another example may be, that admins only endpoints like "adding new user" were not secured at the backend. Anyone will be able to use eg.: POSTMAN to get access to admin-only features. 
+That was all mostly easy to fix bugs that were mostly fixed via AI just by showing my agent an example bad routes.
 
 ## Prompt 1: 
 ### Tool: 
