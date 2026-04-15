@@ -1,5 +1,9 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import Sidebar from "./components/Sidebar.vue";
+import Header from "./components/Header.vue";
+import DeviceTable from "./components/DeviceTable.vue";
+import LoginPage from "./components/LoginPage.vue";
 
 const API_BASE = "http://127.0.0.1:8000";
 
@@ -10,6 +14,9 @@ const devices = ref([]);
 const error = ref("");
 const loading = ref(false);
 const showAddForm = ref(false);
+const searchQuery = ref("");
+const activeNav = ref("hardware");
+
 const newDevice = ref({
   name: "",
   brand: "",
@@ -17,6 +24,16 @@ const newDevice = ref({
   status: "Available",
   notes: "",
   assigned_to: "",
+});
+
+const filteredDevices = computed(() => {
+  if (!searchQuery.value) return devices.value;
+  const query = searchQuery.value.toLowerCase();
+  return devices.value.filter(
+    (d) =>
+      d.name.toLowerCase().includes(query) ||
+      (d.brand && d.brand.toLowerCase().includes(query))
+  );
 });
 
 async function login() {
@@ -45,12 +62,12 @@ async function login() {
 async function logout() {
   token.value = "";
   devices.value = [];
+  error.value = "";
 }
 
 async function fetchDevices() {
   if (!token.value) return;
   error.value = "";
-  loading.value = true;
   try {
     const response = await fetch(`${API_BASE}/devices`, {
       headers: { Authorization: `Bearer ${token.value}` },
@@ -59,8 +76,6 @@ async function fetchDevices() {
     devices.value = await response.json();
   } catch (err) {
     error.value = err.message || "Failed to fetch data";
-  } finally {
-    loading.value = false;
   }
 }
 
@@ -69,7 +84,7 @@ async function addDevice() {
   try {
     const response = await fetch(`${API_BASE}/devices`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token.value}`,
       },
@@ -78,7 +93,14 @@ async function addDevice() {
     if (!response.ok) throw new Error("Failed to create device");
     await fetchDevices();
     showAddForm.value = false;
-    newDevice.value = { name: "", brand: "", purchase_date: "", status: "Available", notes: "", assigned_to: "" };
+    newDevice.value = {
+      name: "",
+      brand: "",
+      purchase_date: "",
+      status: "Available",
+      notes: "",
+      assigned_to: "",
+    };
   } catch (err) {
     error.value = err.message || "Failed to create device";
   }
@@ -115,82 +137,120 @@ async function updateStatus(id, status) {
 </script>
 
 <template>
-  <div>
-    <h1>Booksy Inventory</h1>
-    
-    <div v-if="!token">
-      <h2>Login</h2>
-      <div>
-        <label>Username: <input v-model="username" type="text" /></label>
-      </div>
-      <div>
-        <label>Password: <input v-model="password" type="password" /></label>
-      </div>
-      <button @click="login" :disabled="loading">Login</button>
-      <p v-if="error">{{ error }}</p>
-    </div>
+  <div v-if="!token">
+    <LoginPage
+      v-model:username="username"
+      v-model:password="password"
+      :loading="loading"
+      :error="error"
+      @login="login"
+    />
+  </div>
 
-    <div v-if="token">
-      <button @click="logout">Logout</button>
-      <button @click="fetchDevices" :disabled="loading">Refresh</button>
-      <p v-if="error">{{ error }}</p>
+  <div v-else class="flex h-screen bg-gray-100">
+    <Sidebar :active="activeNav" @logout="logout" />
 
-      <div v-if="showAddForm">
-        <h3>Add Device</h3>
-        <div>
-          <label>Name: <input v-model="newDevice.name" type="text" required /></label>
-        </div>
-        <div>
-          <label>Brand: <input v-model="newDevice.brand" type="text" /></label>
-        </div>
-        <div>
-          <label>Date: <input v-model="newDevice.purchase_date" type="date" /></label>
-        </div>
-        <div>
-          <label>Assigned To: <input v-model="newDevice.assigned_to" type="text" /></label>
-        </div>
-        <div>
-          <label>Notes: <input v-model="newDevice.notes" type="text" /></label>
-        </div>
-        <button @click="addDevice">Add</button>
-        <button @click="showAddForm = false">Cancel</button>
-      </div>
-      <button v-else @click="showAddForm = true">Add Device</button>
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <Header
+        v-model:search="searchQuery"
+        :device-count="filteredDevices.length"
+        @refresh="fetchDevices"
+      />
 
-      <table border="1" cellpadding="5" cellspacing="0" style="margin-top: 20px; border-collapse: collapse;">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Brand</th>
-            <th>Date</th>
-            <th>Assigned To</th>
-            <th>Notes</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="device in devices" :key="device.id">
-            <td>{{ device.id }}</td>
-            <td>{{ device.name }}</td>
-            <td>{{ device.brand || "-" }}</td>
-            <td>{{ device.purchase_date || "-" }}</td>
-            <td>{{ device.assigned_to || "-" }}</td>
-            <td>{{ device.notes || "-" }}</td>
-            <td>
-              <select :value="device.status" @change="(e) => updateStatus(device.id, e.target.value)">
-                <option value="Available">Available</option>
-                <option value="In Use">In Use</option>
-                <option value="Repair">Repair</option>
-              </select>
-            </td>
-            <td>
-              <button @click="deleteDevice(device.id)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <main class="flex-1 overflow-auto p-6">
+        <div class="max-w-7xl mx-auto">
+          <div v-if="error" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {{ error }}
+          </div>
+
+          <div v-if="!showAddForm" class="mb-6">
+            <button @click="showAddForm = true" class="btn-primary">
+              + Add Device
+            </button>
+          </div>
+
+          <div v-if="showAddForm" class="card p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Add New Device</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Device Name *
+                </label>
+                <input
+                  v-model="newDevice.name"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Brand
+                </label>
+                <input
+                  v-model="newDevice.brand"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Date
+                </label>
+                <input
+                  v-model="newDevice.purchase_date"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  v-model="newDevice.status"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Available">Available</option>
+                  <option value="In Use">In Use</option>
+                  <option value="Repair">Repair</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Assigned To
+                </label>
+                <input
+                  v-model="newDevice.assigned_to"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <input
+                  v-model="newDevice.notes"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div class="flex gap-3 mt-4">
+              <button @click="addDevice" class="btn-primary">Create Device</button>
+              <button @click="showAddForm = false" class="btn-secondary">Cancel</button>
+            </div>
+          </div>
+
+          <DeviceTable
+            :devices="filteredDevices"
+            @delete="deleteDevice"
+            @update-status="updateStatus"
+          />
+        </div>
+      </main>
     </div>
   </div>
 </template>
+

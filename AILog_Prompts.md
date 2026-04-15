@@ -63,3 +63,107 @@ Requirements:
 - Make file structure in backend cleaner and separate login and devices logic (preparing for users managing and Docker)
 - Smart Dashboard: A list of hardware showing Name, Brand, Purchase Date, and Status (Available, In Use, Repair -> via enum). Must support sorting and filtering.
 - Update AILog.md and AILog prompts history
+
+
+
+## Prompt 5: prompt prepared with chatGPT to provide a visuals similar to wireframe.
+
+Build a responsive frontend layout based on the provided screenshot of a “Hardware Manager” dashboard.
+
+General Requirements:
+
+* Use modern UI practices (clean spacing, soft shadows, rounded corners).
+* Use a component-based approach (React preferred, but plain HTML/CSS is acceptable if not specified).
+* Style with Tailwind CSS (preferred) or clean CSS.
+* The layout should be responsive (desktop-first, but adaptable to smaller screens).
+
+Layout Structure:
+
+1. Sidebar (Left)
+
+* Fixed vertical sidebar
+* Contains:
+
+  * Title: Hardware Manager (with icon)
+  * Navigation items:
+
+    * Hardware List (active state)
+    * My Rentals
+    * Admin Panel
+  * Bottom section:
+
+    * Logout button (with red accent)
+* Sidebar should have:
+
+  * Light background
+  * Active item highlighted with subtle background
+  * Icons next to each menu item
+
+2. Main Content Area
+
+Header:
+
+* Page title: Hardware List
+* Search bar:
+
+  * Placeholder: “Ask AI…”
+  * Rounded input with subtle border
+  * Icon inside input (left)
+  * Small sparkle icon on the right
+
+Table / List:
+
+* Create a card-style container with a table inside.
+
+Columns:
+
+* Device Name
+* Brand
+* Date Added
+* Status
+* Action
+
+Table Details:
+
+Each row should include:
+
+* Device name (e.g., "MacBook Pro 16”)
+* Brand (Apple, Dell, etc.)
+* Date (YYYY-MM-DD format)
+* Status badge:
+
+  * Available → dark badge
+  * Rented → gray badge
+  * In Repair → red badge
+* Action button:
+
+  * "Rent" button
+  * Disabled (grayed out) if not available
+
+Styling Guidelines:
+
+* Use rounded corners (lg or xl)
+* Subtle shadows for containers
+* Consistent spacing (padding/margin)
+* Badge styles:
+
+  * Pill-shaped
+  * Small font
+* Buttons:
+
+  * Rounded
+  * Dark primary for active
+  * Gray for disabled
+
+Bonus (optional):
+
+* Add hover states for rows and buttons
+* Add basic state handling (e.g., disabled Rent button when status ≠ Available)
+
+Deliverables:
+
+* Clean, readable code
+* Reusable components (Sidebar, Table, Badge, Button)
+* Ready to plug into an existing frontend
+
+

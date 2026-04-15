@@ -61,3 +61,29 @@ VSC with github copilot
 - CORS properly configured for both development IPs
 
 ### Audit:
+- Basics are working fine, now I need to adjust it to fit the requirments.
+
+
+
+## Prompt 5:
+### Tool:
+VSC with github copilot and ChatGPT online as helper in prompt preparation
+
+### AI Generated Code Notes:
+- Built professional **Hardware Manager** dashboard using Vue 3 + Tailwind CSS
+- Created reusable component architecture:
+  - **Sidebar.vue** - Fixed navigation with active states
+  - **Header.vue** - Search bar + device count with icons
+  - **DeviceTable.vue** - Card-style table with status badges and actions
+  - **StatusBadge.vue** - Color-coded status indicator
+  - **LoginPage.vue** - Professional login screen with gradient
+- Added Tailwind CSS config + custom component classes (.btn-primary, .badge, .card)
+- Responsive design with hover states, smooth transitions, and disabled button handling
+
+### Audit:
+- production-ready UI were delivered but not all options are already implemented in backend - this will be next step. Also some minor fixes in frontend may be needed but its just some UI/UX polishing.
+
+
+
+
+
