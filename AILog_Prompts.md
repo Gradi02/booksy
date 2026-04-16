@@ -299,3 +299,39 @@ Permissions & Roles:
 * Non-admin users:
 
   * Cannot see or access any admin panels.
+
+
+
+## Prompt 8:
+Act as a Senior Python/FastAPI backend developer.
+Your task is to identify all mutation endpoints (POST, PATCH, PUT) where a race condition from multiple users could occur (e.g., two users trying to rent the same 'Available' device at the exact same millisecond or two admins editing the same user).
+Please refactor these endpoints to ensure transaction safety using the database session.
+Requirements:
+1. Validate the current status of the device inside the active transaction before making changes.
+2. If a conflict is detected (e.g., device is no longer available), raise a FastAPI HTTPException with status code 409 Conflict and a clear error message.
+3. Keep in mind we are using SQLite only locally and postgres on production.
+4. Ensure session.rollback() is handled appropriately if an exception occurs.
+5. After all update AILog with new section at the bottom, for this prompt.
+
+
+
+## Prompt 9:
+Generate a comprehensive test suite for both Backend and Frontend. The assignment requires at least 3 critical business logic tests (e.g., "Cannot rent broken hardware"), but please generate around 5-6 to ensure robust coverage.
+Backend Tests (pytest):
+- Setup a test environment using pytest and FastAPI's TestClient.
+- Write tests for the following critical paths:
+Success: User can successfully rent an "Available" device.
+Fail: User CANNOT rent a device with status "Repaired" or "Broken" (expect HTTP 400/409).
+Fail (Race Condition): User CANNOT rent a device that is already "Rented" (expect HTTP 409).
+Auth Fail: Unauthenticated user cannot access the /rent endpoint (expect HTTP 401).
+Role Fail: Standard user CANNOT change a device status to "Repaired" (only Admin can do this, expect HTTP 403).
+- Make also simulations tests to check if endpoints sessions logic work properly.
+Frontend Tests (vitest + @vue/test-utils):
+- Write component logic tests using vitest.
+- Mock the API client (e.g., Axios/fetch) using vi.mock() so no real network requests are made.
+- Write tests for the following critical UI interactions:
+UI State: The "Rent" button is NOT rendered (or is disabled) if the device status is "Repaired" or "Rented".
+Action: Clicking "Rent" on an available device triggers the correct API call with the device ID.
+Role Visibility: The "Mark as Repaired" button is only visible if the user's role in the mocked state/store is 'admin'.
+If you see any other crucial logic that in your opinion should be tested, give me the list of it at the end. 
+Update AILog with new section at the bottom but make the overview subsection shorter than before.

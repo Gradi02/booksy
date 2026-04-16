@@ -649,12 +649,12 @@ function navigateTo(view) {
               v-model="newUser.is_admin"
               type="checkbox"
               id="is_admin"
-              :disabled="editingUser?.username === currentUser.username"
+              :disabled="!!editingUser"
               class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             />
             <label for="is_admin" class="ml-2 text-sm font-medium text-gray-700">
               Admin Role
-              <span v-if="editingUser?.username === currentUser.username" class="text-xs text-gray-500">(cannot change own)</span>
+              <span v-if="editingUser" class="text-xs text-gray-500">(cannot change for existing users)</span>
             </label>
           </div>
         </div>

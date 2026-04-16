@@ -189,3 +189,40 @@ VSC with github copilot
 
 ### Audit:
 - All missing features were implemented and look fine and safe for now.
+
+
+
+## Prompt 8: Transaction Safety & Race Condition Mitigation
+### Tool:
+VSC with GitHub Copilot
+
+### AI Generated Code Notes:
+**Critical Issues Found:**
+1. **Device Status Updates** (`PATCH /devices/{id}/status/{status}`)
+2. **Device Updates** (`PUT /devices/{id}`)
+3. **User Creation** (`POST /users`)
+4. **User Updates** (`PUT /users/{id}`)
+5. **Device/User Deletions** (`DELETE` endpoints)
+6. **Device Creation** (`POST /devices`)
+
+### Solution Implementation:
+**Pessimistic Locking Strategy:**
+- Used SQLAlchemy's `.with_for_update()` to lock rows at database level
+- Works on both SQLite and PostgreSQL:
+  - **SQLite**: Uses SERIALIZABLE isolation level (transaction-level locking)
+  - **PostgreSQL**: Uses `FOR UPDATE` clause (row-level locking)
+
+**Session Management:**
+- All mutation endpoints wrapped in try/except blocks
+- `session.rollback()` called on any exception (except HTTPException which is re-raised)
+- Ensures database state consistency even after failed operations
+- `db.refresh(model)` after commit to guarantee fresh data
+
+### Database Configuration Notes:
+- **SQLite locally**: Uses file-based locking, SERIALIZABLE isolation provides race condition safety
+- **PostgreSQL production**: Connection pooling (5 base + 10 overflow) handles concurrent requests efficiently
+- **Foreign Key Constraints**: Now enforced on SQLite via PRAGMA (prevents orphaned records)
+
+### Audit:
+- App is working fine after all these crucial changes, but i cannot test it now alone on my pc. Next step will be to implement tests and simulations to test if everything is working correctly. This prompt was prepared with help of gemini to match the prompt engeneering techniques and worked perfect fixing only selected issues.
+

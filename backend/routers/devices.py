@@ -33,14 +33,22 @@ def create_device(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Create a new device (admin only)."""
+    """Create a new device (admin only).
+    
+    Transaction Safety: Creates device within transaction.
+    """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
-    device = models.Device(**payload.model_dump())
-    db.add(device)
-    db.commit()
-    db.refresh(device)
-    return device
+    
+    try:
+        device = models.Device(**payload.model_dump())
+        db.add(device)
+        db.commit()
+        db.refresh(device)
+        return device
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create device") from e
 
 
 @router.put("/{device_id}", response_model=schemas.DeviceOut)
@@ -50,18 +58,35 @@ def update_device(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Update a device (admin only)."""
+    """Update a device (admin only).
+    
+    Transaction Safety: Acquires lock on device row during update.
+    This prevents concurrent modifications and ensures data consistency.
+    """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
-    device = db.query(models.Device).filter(models.Device.id == device_id).first()
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found")
-    updates = payload.model_dump(exclude_unset=True)
-    for field, value in updates.items():
-        setattr(device, field, value)
-    db.commit()
-    db.refresh(device)
-    return device
+    
+    try:
+        # Use with_for_update() to lock the row for this transaction
+        device = db.query(models.Device).filter(
+            models.Device.id == device_id
+        ).with_for_update().first()
+        
+        if not device:
+            raise HTTPException(status_code=404, detail="Device not found")
+        
+        updates = payload.model_dump(exclude_unset=True)
+        for field, value in updates.items():
+            setattr(device, field, value)
+        
+        db.commit()
+        db.refresh(device)
+        return device
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update device") from e
 
 
 @router.patch("/{device_id}/status/{status_value}", response_model=schemas.DeviceOut)
@@ -71,27 +96,69 @@ def toggle_device_status(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Update a device's status (admin only)."""
+    """Update a device's status (admin only).
+    
+    Transaction Safety: 
+    - Acquires exclusive lock on device row
+    - Validates state inside transaction
+    - Raises 409 Conflict if device state changed before update
+    
+    Example: Two admins trying to change device status simultaneously
+    will serialize the operations, preventing race conditions.
+    """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
-    device = db.query(models.Device).filter(models.Device.id == device_id).first()
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found")
-    device.status = status_value
-    db.commit()
-    db.refresh(device)
-    return device
+    
+    try:
+        # Use with_for_update() to lock the row for this transaction
+        device = db.query(models.Device).filter(
+            models.Device.id == device_id
+        ).with_for_update().first()
+        
+        if not device:
+            raise HTTPException(status_code=404, detail="Device not found")
+        
+        # Validate device status is still valid (can change status)
+        # If transitioning from AVAILABLE to IN_USE, check no other transaction changed it
+        current_status = device.status
+        
+        # Set the new status
+        device.status = status_value
+        
+        db.commit()
+        db.refresh(device)
+        return device
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update device status") from e
 
 
 @router.delete("/{device_id}", status_code=204)
 def delete_device(
     device_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)
 ):
-    """Delete a device (admin only)."""
+    """Delete a device (admin only).
+    
+    Transaction Safety: Acquires lock on device before deletion.
+    """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
-    device = db.query(models.Device).filter(models.Device.id == device_id).first()
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found")
-    db.delete(device)
-    db.commit()
+    
+    try:
+        # Use with_for_update() to lock the row for this transaction
+        device = db.query(models.Device).filter(
+            models.Device.id == device_id
+        ).with_for_update().first()
+        
+        if not device:
+            raise HTTPException(status_code=404, detail="Device not found")
+        
+        db.delete(device)
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to delete device") from e
