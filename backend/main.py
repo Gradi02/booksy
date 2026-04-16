@@ -34,19 +34,22 @@ app = FastAPI(
 )
 
 # Parse CORS origins from environment or use defaults
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
-).split(",")
+origins_str = os.getenv("ALLOWED_ORIGINS", "*")
+if origins_str == "*":
+    origins = ["*"]
+else:
+    # .split(",") tnie tekst tam gdzie są przecinki
+    # .strip() usuwa ewentualne spacje, żeby było bezpiecznie
+    origins = [origin.strip() for origin in origins_str.split(",")]
+    
 
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=origins, # Tu przekazujemy czystą listę
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 # Include routers
