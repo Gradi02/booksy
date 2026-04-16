@@ -13,8 +13,6 @@ services:
         fromDatabase:
           name: hardware-postgres
           property: connectionString
-      - key: OPENAI_API_KEY
-        sync: false
       - key: ALLOWED_ORIGINS
         value: "https://your-frontend.vercel.app,http://localhost:5173" 
 
