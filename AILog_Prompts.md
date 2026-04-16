@@ -335,3 +335,74 @@ Action: Clicking "Rent" on an available device triggers the correct API call wit
 Role Visibility: The "Mark as Repaired" button is only visible if the user's role in the mocked state/store is 'admin'.
 If you see any other crucial logic that in your opinion should be tested, give me the list of it at the end. 
 Update AILog with new section at the bottom but make the overview subsection shorter than before.
+
+
+
+## Prompt 10:
+Build a frontend-only LLM integration that allows users to use their own API keys and choose between multiple providers (e.g. OpenAI, Gemini, Grok). The goal is to create a simple, safe, public demo application with no backend required for handling API keys.
+
+Key requirements:
+1. The app must NOT store or use any developer-owned API keys. All requests must be made using user-provided API keys to avoid abuse and cost risks.
+2. Provide a simple UI with:
+   * A dropdown to select the provider (e.g. "OpenAI", "Gemini", "Grok")
+   * An input field for the user to paste their API key
+   * (Optional) an input or selector for model name
+   * A text input for the prompt
+   * A button to send the request
+3. API keys must be handled securely on the frontend:
+   * Store only in memory (preferred) or localStorage (acceptable for demo)
+   * Never log API keys
+   * Never send API keys to any custom backend
+4. Implement a lightweight provider abstraction layer:
+   Define a unified function like:
+   `callLLM(config, prompt)`
+   Where config includes:
+   * provider
+   * apiKey
+   * model (optional)
+   Internally route requests based on provider:
+   * OpenAI: use standard chat/completions format (messages array)
+   * Gemini: use its native format (contents instead of messages)
+   * Grok (or similar): if compatible, reuse OpenAI-style requests
+5. Normalize responses so the UI always receives a consistent output format (e.g. plain text response).
+6. Keep the implementation minimal and focused on speed:
+   * No authentication system
+   * No rate limiting required
+   * No database
+   * No backend proxy
+7. Handle basic errors gracefully:
+   * Invalid API key
+   * Network errors
+   * Unsupported provider/model
+8. (Optional but recommended) Structure code so new providers can be added easily by extending the switch-case or adapter pattern.
+9. Connect it with backend filtering and sorting system so responses received from AI could be packed into a backend call and parsed into data base selection command. 
+
+Goal:
+A fast, minimal, production-deployed demo (e.g. on Vercel) that safely showcases LLM capabilities without exposing any private API keys or incurring costs from public abuse.
+
+
+
+## Prompt 11:
+App should include the following feature:
+- Smart Assistant: A chat interface or automated logic that helps manage the
+equipment or summarizes its history.
+
+Based on what is already created, adjust frontend to match this. Remove the searching bar from the top. 
+
+Also make me able to use many different models and not only some selected. For example in google gemini Im going to use 2.5 flash model, but now its not available in dropbox - expand this list. 
+
+
+## Prompt 12:
+Remove this big AI setup panel and leave only gemini 2.5 flash model. Remove other options to make it clearer.
+AI need to be in modal view or on right app side and need to persist the panels swaping - user should be able to access it everywhere in the app.
+Check for compatibility for this AI model, because for now Im getting error:
+Error: * GenerateContentRequest.safety_settings[0]: element predicate failed: $.category in (HarmCategory.HARM_CATEGORY_HATE_SPEECH, HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, HarmCategory.HARM_CATEGORY_HARASSMENT, HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY)
+
+skip tests and logs this time, just do the tech stuff.
+
+
+
+## Prompt 13:
+Based on current project structure:
+- remove the AI assistant panel from left side selection. Its now moved to floating icon on bottom Right-side.
+- Update the AI assistant so he will be able to take actions inside the app. Prompts sended to api should return data that can be easily mapped for actions like changing sort, filter or clicking buttons.

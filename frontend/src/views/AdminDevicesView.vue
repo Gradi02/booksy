@@ -45,9 +45,8 @@ function handleMarkRepair(id) {
 
 <template>
   <div>
-    <!-- Title & Actions -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-      <h2 class="text-2xl font-bold text-gray-800">Device Management</h2>
+    <!-- Actions -->
+    <div class="flex flex-col md:flex-row justify-end items-start md:items-center mb-6 gap-4">
       <button @click="handleAdd" class="btn-primary">+ Add Device</button>
     </div>
 

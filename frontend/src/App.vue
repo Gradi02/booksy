@@ -7,6 +7,7 @@ import HardwareListView from "./views/HardwareListView.vue";
 import MyRentalsView from "./views/MyRentalsView.vue";
 import AdminDevicesView from "./views/AdminDevicesView.vue";
 import AdminUsersView from "./views/AdminUsersView.vue";
+import AIChatModal from "./components/AIChatModal.vue";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -23,6 +24,9 @@ const currentView = ref("hardware");
 // Data state
 const devices = ref([]);
 const users = ref([]);
+
+// AI Panel state
+const showAIPanel = ref(false);
 
 // Modal states
 const showDeviceModal = ref(false);
@@ -90,7 +94,81 @@ function restoreSession() {
 
 onMounted(() => {
   restoreSession();
+  setupAIFilterListener();
 });
+
+// Setup listener for AI actions from AIChatModal
+function setupAIFilterListener() {
+  window.addEventListener("applyAIActions", (event) => {
+    const commands = event.detail;
+    if (!Array.isArray(commands)) return;
+    
+    commands.forEach(cmd => {
+      switch (cmd.action) {
+        case "filter":
+          if (cmd.target === "status") {
+            statusFilter.value = cmd.value;
+          }
+          break;
+        
+        case "sort":
+          if (cmd.target === "sort_by") {
+            sortBy.value = cmd.value;
+          }
+          break;
+        
+        case "search":
+          if (cmd.target === "search") {
+            searchQuery.value = cmd.value;
+          }
+          break;
+        
+        case "navigate":
+          if (cmd.target === "view") {
+            navigateTo(cmd.value);
+          }
+          break;
+        
+        case "click":
+          // Handle button clicks if needed
+          if (cmd.target === "rent" && cmd.value) {
+            rentDevice(parseInt(cmd.value));
+          } else if (cmd.target === "return" && cmd.value) {
+            returnDevice(parseInt(cmd.value));
+          }
+          break;
+      }
+    });
+    
+    // Switch to hardware or appropriate view if filtering
+    if (commands.some(c => c.action === "filter" || c.action === "sort" || c.action === "search")) {
+      if (currentView.value !== "admin-devices" && currentView.value !== "admin-users") {
+        currentView.value = "hardware";
+      }
+    }
+  });
+}
+
+// Centralized API call handler with auto-logout on 401
+async function apiCall(url, options = {}) {
+  const headers = options.headers || {};
+  headers.Authorization = `Bearer ${token.value}`;
+  
+  try {
+    const response = await fetch(url, { ...options, headers });
+    
+    // Auto-logout on 401 (token expired/invalid)
+    if (response.status === 401) {
+      error.value = "Session expired. Please login again.";
+      logout();
+      return null;
+    }
+    
+    return response;
+  } catch (err) {
+    throw err;
+  }
+}
 
 // Computed properties for filtering
 const filteredDevices = computed(() => {
@@ -170,9 +248,8 @@ async function logout() {
 async function fetchDevices() {
   if (!token.value) return;
   try {
-    const response = await fetch(`${API_BASE}/devices`, {
-      headers: { Authorization: `Bearer ${token.value}` },
-    });
+    const response = await apiCall(`${API_BASE}/devices`);
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to load devices");
     devices.value = await response.json();
   } catch (err) {
@@ -183,9 +260,8 @@ async function fetchDevices() {
 async function fetchUsers() {
   if (!token.value || !currentUser.value?.is_admin) return;
   try {
-    const response = await fetch(`${API_BASE}/users`, {
-      headers: { Authorization: `Bearer ${token.value}` },
-    });
+    const response = await apiCall(`${API_BASE}/users`);
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to load users");
     users.value = await response.json();
   } catch (err) {
@@ -201,14 +277,14 @@ async function addDevice() {
     return;
   }
   try {
-    const response = await fetch(`${API_BASE}/devices`, {
+    const response = await apiCall(`${API_BASE}/devices`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(newDevice.value),
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to create device");
     await fetchDevices();
     showDeviceModal.value = false;
@@ -226,14 +302,14 @@ async function updateDevice() {
     return;
   }
   try {
-    const response = await fetch(`${API_BASE}/devices/${editingDevice.value.id}`, {
+    const response = await apiCall(`${API_BASE}/devices/${editingDevice.value.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(newDevice.value),
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to update device");
     await fetchDevices();
     showDeviceModal.value = false;
@@ -247,10 +323,10 @@ async function deleteDevice(id) {
   if (!confirm("Are you sure you want to delete this device?")) return;
   error.value = "";
   try {
-    const response = await fetch(`${API_BASE}/devices/${id}`, {
+    const response = await apiCall(`${API_BASE}/devices/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${token.value}` },
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to delete device");
     await fetchDevices();
   } catch (err) {
@@ -261,10 +337,10 @@ async function deleteDevice(id) {
 async function updateDeviceStatus(id, status) {
   error.value = "";
   try {
-    const response = await fetch(`${API_BASE}/devices/${id}/status/${status}`, {
+    const response = await apiCall(`${API_BASE}/devices/${id}/status/${status}`, {
       method: "PATCH",
-      headers: { Authorization: `Bearer ${token.value}` },
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to update status");
     await fetchDevices();
   } catch (err) {
@@ -285,14 +361,14 @@ async function rentDevice(id) {
       assigned_to: currentUser.value.username,
     };
     
-    const response = await fetch(`${API_BASE}/devices/${id}`, {
+    const response = await apiCall(`${API_BASE}/devices/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(updateData),
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to rent device");
     await fetchDevices();
   } catch (err) {
@@ -312,14 +388,14 @@ async function returnDevice(id) {
       assigned_to: null,
     };
     
-    const response = await fetch(`${API_BASE}/devices/${id}`, {
+    const response = await apiCall(`${API_BASE}/devices/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(updateData),
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) throw new Error("Failed to return device");
     await fetchDevices();
   } catch (err) {
@@ -335,14 +411,14 @@ async function markInRepair(id) {
 async function addUser() {
   error.value = "";
   try {
-    const response = await fetch(`${API_BASE}/users`, {
+    const response = await apiCall(`${API_BASE}/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(newUser.value),
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.detail || "Failed to create user");
@@ -359,14 +435,14 @@ async function updateUser() {
   if (!editingUser.value?.id) return;
   error.value = "";
   try {
-    const response = await fetch(`${API_BASE}/users/${editingUser.value.id}`, {
+    const response = await apiCall(`${API_BASE}/users/${editingUser.value.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify(newUser.value),
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.detail || "Failed to update user");
@@ -390,10 +466,10 @@ async function deleteUser(id) {
   if (!confirm("Are you sure you want to delete this user?")) return;
   error.value = "";
   try {
-    const response = await fetch(`${API_BASE}/users/${id}`, {
+    const response = await apiCall(`${API_BASE}/users/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${token.value}` },
     });
+    if (!response) return; // Auto-logout happened
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.detail || "Failed to delete user");
@@ -492,7 +568,7 @@ function navigateTo(view) {
 
     <div class="flex-1 flex flex-col overflow-hidden">
       <Header
-        v-model:search="searchQuery"
+        :current-view="currentView"
       />
 
       <main class="flex-1 overflow-auto p-6">
@@ -545,6 +621,26 @@ function navigateTo(view) {
           />
         </div>
       </main>
+
+      <!-- Floating AI Chat Button (Right bottom corner) -->
+      <button
+        @click="showAIPanel = !showAIPanel"
+        class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-2xl transition-all hover:scale-110 z-40"
+        title="Smart Assistant"
+      >
+        🤖
+      </button>
+
+      <!-- AI Chat Modal (Right side panel) -->
+      <div
+        v-if="showAIPanel"
+        class="fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-40 flex flex-col"
+      >
+        <AIChatModal
+          :devices="devices"
+          @close="showAIPanel = false"
+        />
+      </div>
     </div>
 
     <!-- Device Modal -->

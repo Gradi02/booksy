@@ -21,9 +21,6 @@ function handleReturn(id) {
 
 <template>
   <div>
-    <!-- Title -->
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">My Rentals</h2>
-
     <!-- No Rentals Message -->
     <div v-if="devices.length === 0" class="card p-8 text-center">
       <p class="text-gray-500 text-lg">You haven't rented any devices yet</p>

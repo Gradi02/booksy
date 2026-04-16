@@ -281,4 +281,60 @@ Created tests were not all fine at first and I needed to cooperate more with Age
 After short iteration I decided to not improve the tests much and just make them work. I have used workaround in frontend tests by adding new special .js file that is running tests to dont have to fight with libs versions management at this moment.
 
 
+## Prompt 10: Frontend-Only LLM Integration
+### Tool:
+VSC with GitHub Copilot
+
+### AI Generated Code Notes:
+- **Provider Abstraction Layer** (`llmProviders.js`): Unified `callLLM()` interface for OpenAI, Gemini, and Grok
+- **Provider-specific adapters**: Each provider has native API format (OpenAI: messages array, Gemini: contents object, Grok: OpenAI-compatible)
+- **Response Parsing**: `parseResponseForBackendCommand()` extracts filter/sort intents from AI responses
+- **UI Component** (`AIChatPanel.vue`): Provider selector, API key input (memory-only), model dropdown, prompt textarea, response display
+- **Security**: Keys never logged, never sent to backend, only in-memory storage, direct to provider APIs
+
+### Audit:
+Frontend-only LLM integration works perfectly, but not at expected scope. Still its nice upgrade that I will iterate to got the solution that is in my mind.
+
+
+
+## Prompt 11: Smart Assistant Enhancement & Custom Model Support
+### Tool:
+VSC with GitHub Copilot
+
+### AI Generated Code Notes:
+- **Renamed AI Assistant to Smart Assistant** - Better reflects equipment management purpose
+- **Removed search bar** from Header component - Replaced with dynamic page titles
+- **Custom Model Support** - Added toggle between Preset (dropdown) and Custom (text input) modes
+- **Expanded Model Lists**: 
+  - OpenAI: gpt-4-turbo, gpt-4, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+  - Gemini: gemini-pro, gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash, **gemini-2.5-flash**, **gemini-2.5-pro**
+  - Grok: grok-1, grok-vision-beta, **grok-2**
+- **Future-proof**: Custom mode allows any model without code changes
+
+### Audit:
+Smart Assistant is now the primary device querying tool. Users can access latest models (Gemini 2.5, GPT-4o-mini, etc.) via custom mode. All tests passing, no regressions. Still not what I was thinking about.
+
+
+
+## Prompt 12: Smart Assistant Enhancement & Custom Model Support
+### Tool:
+VSC with GitHub Copilot
+
+### AI Generated Code Notes:
+- Fixed Gemini API Safety Settings - Updated llmProviders.js to use valid Gemini safety categories (HARM_CATEGORY_HATE_SPEECH, SEXUALLY_EXPLICIT, DANGEROUS_CONTENT, HARASSMENT) instead of UNSPECIFIED. This resolves the error you were getting.
+- Simplified to Gemini 2.5 Flash Only - Created new AIChatModal.vue component that hardcodes this single model. No provider selection, no model dropdown—just clean and focused.
+- Persistent AI Panel Across App - Added a floating 🤖 button in bottom-right corner that persists across all views:
+- Click to toggle the AI chat panel on/off
+Panel stays accessible from Hardware List, My Rentals, Admin views
+Doesn't interfere with existing navigation
+Uses z-index layering to float above main content
+Modal UI - Right-side compact panel (w-80 h-96) with:
+- Minimal setup (just API key input)
+Query textarea
+Send button
+Response display with filter application
+Close button to collapse
+
+### Audit:
+UI and UX looks much better now but its not working correctly now. Sending prompts does nothing so i need to investigate it.
 

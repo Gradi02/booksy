@@ -30,11 +30,20 @@ A fullstack inventory management system for tracking company hardware devices an
 
 - **Responsive UI**
   - Sidebar navigation with admin features
-  - Search bar (placeholder for future AI integration)
-  - Header with device count
+  - Dynamic page titles for each view
   - Status badges with color coding
   - Modals for creating/editing devices and users
   - Session persistence (localStorage)
+
+- **Smart Assistant** (AI-Powered Equipment Management)
+  - 🤖 Natural language device queries using OpenAI, Gemini, or Grok
+  - User-provided API keys (never stored, in-memory only)
+  - **Custom model support** - Use any model from your provider (e.g., Gemini 2.5 Flash, GPT-4o-mini, Grok-2)
+  - Automatic parsing of AI responses for filter/sort commands
+  - One-click application of AI-detected filters to device list
+  - Works directly with provider APIs (no backend proxy)
+  - Primary tool for intelligent device discovery and management
+  - Primary tool for intelligent device discovery and management
 
 - **Auto-Healing System**
   - Database tables auto-created on startup
@@ -93,6 +102,41 @@ A fullstack inventory management system for tracking company hardware devices an
 - **Why?** Vitest requires Node.js v16+, but older environments may have v14. Manual runner works anywhere.
 - **Workaround:** Run `node frontend/run-tests-manual.js` to validate 10 critical UI tests
 - **Future improvement:** Upgrade Node.js to v18+ LTS and use full vitest suite (see TESTING.md)
+Smart Assistant Usage
+
+The app includes an **AI-powered Smart Assistant** for intelligent equipment management:
+
+1. **Navigate** to the 🤖 **Smart Assistant** tab in the sidebar
+2. **Select** your preferred AI provider (OpenAI, Gemini, or Grok)
+3. **Choose model mode**:
+   - **Preset**: Use curated models for each provider
+   - **Custom**: Enter any model name (e.g., `gemini-2.5-flash`, `gpt-4o-mini`, `grok-2`)
+4. **Paste** your API key (stays in memory, never stored)
+5. **Ask** natural language questions about your devices
+6. **Apply** detected filters directly to your Hardware List
+
+**Example queries:**
+- "Show me all available devices"
+- "Which devices are in repair?"
+- "Sort devices by brand"
+- "Summarize my device inventory"
+
+**Supported Models:**
+- **OpenAI**: gpt-4-turbo, gpt-4, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+- **Gemini**: gemini-pro, gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro ✨
+- **Grok**: grok-1, grok-vision-beta, grok-2 ✨
+**Example queries:**
+- "Show me all available devices"
+- "Which devices are in repair?"
+- "Sort devices by brand"
+- "Summarize my device inventory"
+
+**Supported Models:**
+- **OpenAI**: gpt-4-turbo, gpt-4, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+- **Gemini**: gemini-pro, gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro ✨
+- **Grok**: grok-1, grok-vision-beta, grok-2 ✨
+
+For detailed setup and API key information, see [AI_ASSISTANT_GUIDE.md](AI_ASSISTANT_GUIDE.md)
 
 ## Best Next Steps - 24h Roadmap
 

@@ -107,3 +107,18 @@ class DeviceOut(DeviceBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AICommand(BaseModel):
+    """Structured command from AI for frontend actions"""
+    action: str  # "filter", "sort", "search", "click", "navigate"
+    target: str | None = None  # target field/button (e.g., "status", "sort_by", "device_id_5")
+    value: str | None = None  # value for the action (e.g., "Available", "date", "delete")
+    description: str | None = None  # human-readable description
+
+
+class AIResponse(BaseModel):
+    """Response from AI endpoint containing commands and explanation"""
+    explanation: str  # Human-readable explanation
+    commands: list[AICommand] = []  # List of actions to execute
+    success: bool = True

@@ -33,9 +33,6 @@ function handleRent(id) {
 
 <template>
   <div>
-    <!-- Title -->
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Hardware List</h2>
-
     <!-- Filter & Sort Controls -->
     <div class="flex flex-col md:flex-row gap-4 mb-6">
       <div>
