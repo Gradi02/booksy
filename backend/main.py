@@ -31,22 +31,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Booksy Inventory API",
     lifespan=lifespan,
-)
-
-# Parse CORS origins from environment or use defaults
-origins_str = os.getenv("ALLOWED_ORIGINS", "*")
-if origins_str == "*":
-    origins = ["*"]
-else:
-    # .split(",") tnie tekst tam gdzie są przecinki
-    # .strip() usuwa ewentualne spacje, żeby było bezpiecznie
-    origins = [origin.strip() for origin in origins_str.split(",")]
-    
+) 
 
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, # Tu przekazujemy czystą listę
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
