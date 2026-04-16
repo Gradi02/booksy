@@ -35,14 +35,12 @@ A fullstack inventory management system for tracking company hardware devices an
   - Modals for creating/editing devices and users
   - Session persistence (localStorage)
 
-- **Smart Assistant** (AI-Powered Equipment Management)
-  - 🤖 Natural language device queries using OpenAI, Gemini, or Grok
+- **Smart Assistant** (AI-Powered by gemini 2.5 Flash only)
+  - Natural language device queries using Gemini,
   - User-provided API keys (never stored, in-memory only)
-  - **Custom model support** - Use any model from your provider (e.g., Gemini 2.5 Flash, GPT-4o-mini, Grok-2)
   - Automatic parsing of AI responses for filter/sort commands
   - One-click application of AI-detected filters to device list
   - Works directly with provider APIs (no backend proxy)
-  - Primary tool for intelligent device discovery and management
   - Primary tool for intelligent device discovery and management
 
 - **Auto-Healing System**
@@ -104,46 +102,16 @@ A fullstack inventory management system for tracking company hardware devices an
 - **Future improvement:** Upgrade Node.js to v18+ LTS and use full vitest suite (see TESTING.md)
 Smart Assistant Usage
 
-The app includes an **AI-powered Smart Assistant** for intelligent equipment management:
-
-1. **Navigate** to the 🤖 **Smart Assistant** tab in the sidebar
-2. **Select** your preferred AI provider (OpenAI, Gemini, or Grok)
-3. **Choose model mode**:
-   - **Preset**: Use curated models for each provider
-   - **Custom**: Enter any model name (e.g., `gemini-2.5-flash`, `gpt-4o-mini`, `grok-2`)
-4. **Paste** your API key (stays in memory, never stored)
-5. **Ask** natural language questions about your devices
-6. **Apply** detected filters directly to your Hardware List
-
-**Example queries:**
-- "Show me all available devices"
-- "Which devices are in repair?"
-- "Sort devices by brand"
-- "Summarize my device inventory"
-
-**Supported Models:**
-- **OpenAI**: gpt-4-turbo, gpt-4, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
-- **Gemini**: gemini-pro, gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro ✨
-- **Grok**: grok-1, grok-vision-beta, grok-2 ✨
-**Example queries:**
-- "Show me all available devices"
-- "Which devices are in repair?"
-- "Sort devices by brand"
-- "Summarize my device inventory"
-
-**Supported Models:**
-- **OpenAI**: gpt-4-turbo, gpt-4, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
-- **Gemini**: gemini-pro, gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro ✨
-- **Grok**: grok-1, grok-vision-beta, grok-2 ✨
-
-For detailed setup and API key information, see [AI_ASSISTANT_GUIDE.md](AI_ASSISTANT_GUIDE.md)
+### 8. **AI api key required from user**
+- user need to use his own api key in case of using AI tools in app
+- **Why?** Global api key will require to be safely stored in backend but in this case where everyone can access app and no strict hacker blockers are featured, this is the safest and easiest way to implement this AI integration.
+- **Future improvement:** In case of better cloud systems, there should be global api key builded inside the backend. With things like langfuse it will be able to track usage of it. This may also need a systems preventing from spamming to AI api.
 
 ## Best Next Steps - 24h Roadmap
 
-1. **Change default admin password** immediately in production
-2. **Add email verification** for new users (confirm @booksy.com domain)
-3. **Device History Tracking** Record status changes with timestamps
-4. **Integrate Langfuse** for AI usage tracking and analytics
+1. **Add email verification** for new users (confirm @booksy.com domain)
+2. **Device History Tracking** Record status changes with timestamps
+3. **Update AI agent feature** to provide better user experience
 
 ## Local Development
 

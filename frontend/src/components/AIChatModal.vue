@@ -94,6 +94,9 @@ function clearResponse() {
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
         <p class="text-xs text-gray-500 mt-1">🔒 Never stored, never logged</p>
+        <p class="text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 p-2 rounded mt-2">
+          ⚠️ Currently only <strong>Gemini 2.5 Flash</strong> is supported and working
+        </p>
       </div>
 
       <!-- Prompt Input -->

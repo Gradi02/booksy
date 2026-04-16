@@ -338,3 +338,39 @@ Close button to collapse
 ### Audit:
 UI and UX looks much better now but its not working correctly now. Sending prompts does nothing so i need to investigate it.
 
+
+
+## Prompt 13: Smart Assistant Enhancement
+### Tool:
+VSC with GitHub Copilot
+
+### AI Generated Code Notes:
+1. Frontend UI Changes
+Removed AI Assistant from left sidebar navigation (Sidebar.vue)
+Removed dedicated AIAssistantView route from the main app (App.vue)
+The AI assistant now appears only as a floating button in the bottom-right corner
+2. Enhanced AI Command System
+Updated the command parsing to support diverse actions:
+Filter - By device status (Available, In Use, Repair, All)
+Sort - By brand, date, or name
+Search - Find devices by name/description
+Navigate - Switch between views (rentals, device management)
+Click - Execute button actions (extensible for rent/return)
+3. Backend AI Router
+Created ai.py with:
+/api/ai/parse-command - Endpoint to parse natural language into structured commands
+/api/ai/suggestions - Endpoint to provide usage suggestions
+New schemas for AICommand and AIResponse in schemas.py
+4. Updated Components
+AIChatModal now:
+Displays detected actions in a clear format
+Shows what will happen before applying changes
+Supports multiple simultaneous commands
+App.vue now:
+Handles applyAIActions events with diverse command types
+Intelligently switches views when applying filters
+Supports navigation and multi-action sequences
+5. Improved Command Parsing
+
+### Audit:
+Finally AI agent inside the app is working fine. There apeard some weird functions that will require updating, but main rout is nice for this prototype. 
