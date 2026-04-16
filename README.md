@@ -88,6 +88,12 @@ A fullstack inventory management system for tracking company hardware devices an
 - **Why?** Because of deployment sites requirement - free sites have many limitations like not persistance disks
 - **Future improvement:** Using one database provider for both deployment and local app running and switching cloud service for better and more complex one.
 
+### 7. **Manual Frontend Test Runner**
+- `run-tests-manual.js` validates UI logic without vitest
+- **Why?** Vitest requires Node.js v16+, but older environments may have v14. Manual runner works anywhere.
+- **Workaround:** Run `node frontend/run-tests-manual.js` to validate 10 critical UI tests
+- **Future improvement:** Upgrade Node.js to v18+ LTS and use full vitest suite (see TESTING.md)
+
 ## Best Next Steps - 24h Roadmap
 
 1. **Change default admin password** immediately in production

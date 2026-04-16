@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from models import DeviceStatus
 
@@ -18,8 +18,7 @@ class UserInDB(BaseModel):
     username: str
     is_admin: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserOut(BaseModel):
@@ -27,8 +26,7 @@ class UserOut(BaseModel):
     username: str
     is_admin: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
@@ -108,5 +106,4 @@ class DeviceUpdate(BaseModel):
 class DeviceOut(DeviceBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

@@ -218,11 +218,67 @@ VSC with GitHub Copilot
 - Ensures database state consistency even after failed operations
 - `db.refresh(model)` after commit to guarantee fresh data
 
-### Database Configuration Notes:
-- **SQLite locally**: Uses file-based locking, SERIALIZABLE isolation provides race condition safety
-- **PostgreSQL production**: Connection pooling (5 base + 10 overflow) handles concurrent requests efficiently
-- **Foreign Key Constraints**: Now enforced on SQLite via PRAGMA (prevents orphaned records)
-
 ### Audit:
 - App is working fine after all these crucial changes, but i cannot test it now alone on my pc. Next step will be to implement tests and simulations to test if everything is working correctly. This prompt was prepared with help of gemini to match the prompt engeneering techniques and worked perfect fixing only selected issues.
+
+
+
+## Prompt 9: Comprehensive Test Suite Implementation
+### Tool:
+VSC with GitHub Copilot
+
+### AI Generated Code Notes:
+Created production-grade test suite covering critical business logic with 6+ tests per domain (backend + frontend).
+
+**Backend Tests (pytest + FastAPI TestClient):**
+- Setup: In-memory SQLite with database fixtures and JWT token generation
+- 6 test classes with 25+ critical tests:
+  1. **Device Rental Logic** - Success/fail cases, race conditions, role authorization
+  2. **Authentication/Authorization** - 401/403 validation across all endpoints
+  3. **User Management** - Creation, duplicate prevention (409), password updates
+  4. **Transaction Safety** - Concurrent operations serialize correctly
+  5. **Error Handling** - Invalid IDs/credentials return appropriate HTTP codes
+
+**Frontend Tests (vitest + @vue/test-utils):**
+- Mock API client completely (no network requests)
+- 5 test suites with 15+ critical tests:
+  1. **Device Rental UI** - Rent button visibility for Repair/In Use/Available status
+  2. **Rent Action Triggers** - Correct API calls on action, error handling
+  3. **Role-Based Visibility** - Admin controls only visible to admins
+  4. **Session Persistence** - localStorage restoration and logout cleanup
+  5. **Navigation Guards** - Non-admins blocked from admin views
+
+**Backend:**
+1. ✅ User successfully rents Available device (admin auth required)
+2. ✅ User CANNOT rent Repair/In Use device
+3. ✅ User CANNOT rent already rented device (race condition)
+4. ✅ Unauthenticated user gets 401 on any endpoint
+5. ✅ Regular user gets 403 on admin-only endpoints
+6. ✅ Cannot create duplicate username (409 Conflict)
+
+**Frontend:**
+1. ✅ Rent button NOT shown for Repair status
+2. ✅ Rent button NOT shown for In Use status
+3. ✅ Rent button shown for Available status
+4. ✅ Rent action triggers correct API call with device ID
+5. ✅ Mark as Repaired button only visible to admins
+6. ✅ Session persists across page reloads via localStorage
+
+**Additional Logic That Should Be Tested (Future):**
+1. **Return Device Flow** - Transition from "In Use" → "Available"
+2. **Mark Device In Repair** - State transition validation
+3. **Concurrent User Updates** - Two admins editing same user
+4. **Admin Promotion** - Cannot promote/demote own account
+5. **Device History Tracking** - Audit trail updates
+6. **Bulk Operations** - Multiple devices updated atomically
+7. **Permission Boundaries** - User cannot modify other users' rentals
+8. **Device Assignment Lifecycle** - Assigned_to field validation
+9. **Timestamp Validation** - Purchase date cannot be in future
+10. **Search & Filter** - Device search with status filters
+
+### Audit:
+Created tests were not all fine at first and I needed to cooperate more with Agent to solve the occured issues and make the tests work. There were also added 3 new .md files that I didnt asked for, but I will leave them for now as a part of testing documentation. In future I will need to read them carefully to see if I really need this. Also important note is that there are only a few tests and this may need to be expansed to coverage a whole app.
+After short iteration I decided to not improve the tests much and just make them work. I have used workaround in frontend tests by adding new special .js file that is running tests to dont have to fight with libs versions management at this moment.
+
+
 

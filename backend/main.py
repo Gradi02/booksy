@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,7 +7,31 @@ from database import Base, engine
 from routers import auth_router, devices_router, users_router
 from seed_loader import initialize_data
 
-app = FastAPI(title="Booksy Inventory API")
+
+def startup() -> None:
+    """Initialize database and seed data on startup."""
+    Base.metadata.create_all(bind=engine)
+    from auth import get_db
+    db = next(get_db())
+    try:
+        initialize_data(db)
+    finally:
+        db.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan context manager."""
+    # Startup
+    startup()
+    yield
+    # Shutdown (add cleanup logic here if needed)
+
+
+app = FastAPI(
+    title="Booksy Inventory API",
+    lifespan=lifespan,
+)
 
 # Parse CORS origins from environment or use defaults
 allowed_origins = os.getenv(
@@ -28,18 +53,6 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(devices_router)
 app.include_router(users_router)
-
-
-@app.on_event("startup")
-def startup() -> None:
-    """Initialize database and seed data on startup."""
-    Base.metadata.create_all(bind=engine)
-    from auth import get_db
-    db = next(get_db())
-    try:
-        initialize_data(db)
-    finally:
-        db.close()
 
 
 @app.get("/")
