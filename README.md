@@ -3,8 +3,8 @@
 A fullstack inventory management system for tracking company hardware devices and rentals.
 
 **Live Demo:** 
-- Backend: https://booksy-backend.onrender.com
-- Frontend: https://booksy-hardware-manager.vercel.app
+- Backend: https://hardware-api-woty.onrender.com
+- Frontend: https://booksy-rosy-three.vercel.app
 
 ## Fully Implemented
 
